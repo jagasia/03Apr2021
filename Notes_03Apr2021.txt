@@ -1,0 +1,247 @@
+Routing
+----------
+	We need some hyper links in our web site.
+	but the link is not for a page. the link is for a component.
+	How can we create links to a component.
+
+Answer:	Routing
+	While creating a project, we have chosen "yes" for routing.
+	so in app.module.ts it is already enabled
+
+	If we have chosen "no" for routing, while creating a project,
+	then we have to import RoutingModule in app.module.ts
+	
+	
+Second step.
+	We need to create "Routes" in router config file
+	
+What is a route?
+	route is a JSON object that has information:
+		"path" and the corresponding "component"
+	so that, the path refers to the component. we can give links to a component using the route
+	const routes: Routes = [{path:'branch',component:BranchComponent}];
+	
+Example:
+	we create a new project and add a menu ("nav" in bootstrap)
+	Home	About Us	Contact Us	Branch Page	
+
+Home page is the current page (app component) Default content will be displayed
+	other pages are components that is displayed as a portion in the app component.
+
+The menus are given link to the component.
+
+Now how will you decide/ ensure where the component to be displayed?
+	Where will the component be displayed in the container (app component is the container)?
+	<router-outlet></router-outlet>
+
+router outlet is the location (place holder) where, the child component be displayed.
+
+earlier also, we created child components, but we did not use <router-outlet></router-outlet> but how the child was displayed in the parent?
+
+	Those times, we added a "selector"	like	<app-branch></app-branch>
+	so the child component was displayed in the selector region.
+
+so why we need something now? <router-outlet></router-outlet>			?????
+
+1) app.module.ts
+	ensure that AppRoutingModule	is imported
+2) app-routing.module.ts
+	in the const routes, (initially it is blank 	[])
+	add the routes
+		each route has "path" and "component"
+		const routes: Routes = [{path:'branch',component:BranchComponent}];
+3) in menu.component.html
+	define the link
+	<a routerLink="/branch">Branch Page</a>
+
+
+Task:
+create components like
+	about us
+	contact us
+	
+and provide routes link for them
+
+
+Activity:
+there are 3 <router-outlet> in the app.component.html
+whenever the menu item is clicked, how will you specify, in which <router-outlet>, the component should be displayed?
+
+How will you mention the router outlet name on which the component should be displayed?
+
+
+Steps for named router outlets:
+---------------------------------
+1) app-routing.module.ts
+	
+const routes: Routes = [
+  {path:'branch',component:BranchComponent, outlet:'col2'},
+  {path:'about',component:AboutUsComponent, outlet:'col1'},
+  {path:'contact',component:ContactUsComponent, outlet:'col1'}
+];
+
+2) in app.component.html, add the name to the router outlet
+<div class="container">
+  <div class="row">
+    <div class="col-sm-2">
+      <h3>Column 1</h3>
+      <router-outlet name="col1"></router-outlet>
+    </div>
+    <div class="col-sm-8">
+      <h3 style="text-align: center;">Column 2</h3>
+      <router-outlet name="col2"></router-outlet>
+          </div>
+    <div class="col-sm-2">
+      <h3>Column 3</h3>        
+      <router-outlet name="col3"></router-outlet>
+    </div>
+  </div>
+</div>
+
+
+3) in menu.component.html
+	modify the routerLink
+<ul class="nav navbar-nav">
+        <li class="active"><a href="#">Home</a></li>
+        <li><a [routerLink]="[{outlets: {'col2': ['branch']}}]">Branch Page</a></li>
+        <li><a [routerLink]="[{outlets:{'col1':['contact']}}]">Contact Us</a></li>
+        <li><a [routerLink]="[{outlets:{'col1':['about']}}]">About Us</a></li>
+      </ul>
+    <!-- </div> -->
+  </nav>
+
+
+============================
+In routing, there are 3 concepts
+1) routing
+2) routing with router outlet names
+3) routing in typescript code
+	means? if condition is true, redirect to that component. else redirect to this component
+
+	even in html code, we can do these conditions. both html or ts code to conditionally redirect
+
+--------------------------
+
+Pending topics:
+1) OTP validation 	(angular)
+2) file upload	  	(angular)
+3) Date
+4) password encryption
+5) in a drop downlist, displaying dynamic output from back end
+6) Queries in JPA Repository	(completed)
+7) angular form data	(completed)
+-------------------------
+Task
+	display "login" component in the col3
+	the login component provides an option for the user to signup
+	"signup" component
+
+
+Signup Form should contains:
+	userName
+	password
+	confirm password
+	first name
+	last name
+	date of birth
+	email address		(for otp)
+	
+
+
+-----------------------
+
+CREATE TABLE USERMASTER
+(
+    userName varchar2(100) primary key,
+    password varchar2(100) not null,
+    firstName varchar2(100),
+    lastName varchar2(100),
+    dateOfBirth date,
+    emailAddress varchar2(100),
+    role varchar2(100),
+    status varchar2(100) default 'pending'
+);
+
+
+
+--------------------------------
+you already know post method and Request Body.
+But here, in login validation, it is peculiar. Because, there is no Object that has only userName and password
+
+so we use FormData
+and append the userName and password into the form data.
+
+fnLogin()
+  {
+    var userName=this.loginForm.controls.userName.value;
+    var password=this.loginForm.controls.password.value;
+    console.log(userName+":"+password);
+    const formData=new FormData();
+    formData.append('userName',userName);
+    formData.append('password',password);
+    this.us.validateLogin(formData).subscribe(data=>{
+      console.log(data);
+      if(data==null)
+        this.status="Login failed";
+      else
+      {
+        this.router.navigate([{outlets:{'col3':['home']}}]);        
+        // this.router.navigateByUrl('/(col3:home)');
+      }
+    });
+  }
+-------------------------------
+Task:
+validate login:
+	use form data and append user name and password
+the formdata is sent using post method
+
+-------------------------------------------------------
+How OTP validation can be done?
+
+1) a controller method to generate OTP and send it to the email address and return "otp" back as response
+2) from angular, we call the url (supply email address) and get otp
+3) keep the result (otp) in a variable and compare the otp entered by the user
+
+----------------------
+Task:
+	Complete the otp validation now
+1) sign up form should be able to create a new user
+2) before adding a new user, 
+	entered otp should be compared with generated otp. If they are equal, then only add the user.
+	Entered otp is invalid. THis error should be displayed.
+Enhancement:
+	Otp validation should be performed as a custom validator. 
+	Any validation failed, will cause the while form Error into true.
+
+	Only if the whole form errors is false, then submit the form to back end
+
+
+-----------------------------
+in angular,
+	the date is captured by <input type=date />
+this actually is a text control means, a string "yyyy-MM-dd" is obtained
+
+but in reactive form, <input type=date />
+	is treated as a date.
+
+in JSON, date is NOT  a STRING. it is Date.
+So automatically, the date is assigned to the Request Body User object
+
+
+----------------
+<form [formGroup]="signupForm" ngNativeValidate>
+
+
+ngNativeValidate
+
+to enable HTML5 form validations in angular
+
+
+--------------------
+To upload image,
+
+the entity mapping to the object in controller is not working
+
+so we have to send them as form data and receive at controller as @RequestParam
+
